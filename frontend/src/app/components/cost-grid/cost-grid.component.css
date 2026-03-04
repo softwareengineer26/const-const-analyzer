@@ -1,0 +1,51 @@
+.cost-grid-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-section h1 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.case-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.case-selector label {
+  font-weight: 600;
+  color: #555;
+}
+
+.case-selector select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 280px;
+  background-color: #fff;
+}
+
+.case-selector select:focus {
+  outline: none;
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+}
+
+.cost-grid {
+  width: 100%;
+  height: 520px;
+}

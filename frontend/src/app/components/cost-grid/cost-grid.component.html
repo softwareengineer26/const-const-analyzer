@@ -1,0 +1,25 @@
+<div class="cost-grid-container">
+  <div class="header-section">
+    <h1>Construction Cost Tracker</h1>
+    <div class="case-selector">
+      <label for="caseSelect">Select Case:</label>
+      <select id="caseSelect" [(ngModel)]="selectedCaseId" (ngModelChange)="onCaseChange()">
+        <option *ngFor="let c of cases" [ngValue]="c.caseId">
+          {{ c.caseName }} (ID: {{ c.caseId }})
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <ag-grid-angular
+    class="ag-theme-alpine cost-grid"
+    [rowData]="rowData"
+    [columnDefs]="columnDefs"
+    [defaultColDef]="defaultColDef"
+    [animateRows]="true"
+    [singleClickEdit]="true"
+    [stopEditingWhenCellsLoseFocus]="true"
+    (gridReady)="onGridReady($event)"
+    (cellValueChanged)="onCellValueChanged($event)">
+  </ag-grid-angular>
+</div>
