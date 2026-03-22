@@ -205,3 +205,6 @@ VALUES (2, 39, 95000.00, 'Sales and marketing');
 
 -- Insert default Admin Settings
 MERGE INTO admin_settings (id, number_of_units, total_square_feet) KEY (id) VALUES (1, 100, 20000);
+
+-- Reset auto-increment sequence past the seeded row so new inserts get id=2+
+ALTER TABLE admin_settings ALTER COLUMN id RESTART WITH 2;
