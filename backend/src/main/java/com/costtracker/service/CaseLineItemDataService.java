@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +38,7 @@ public class CaseLineItemDataService {
     }
 
     /**
-     * Retrieves all line item data for a given case using Spring JDBC Template.
-     * Computes $/Unit and $/Sq.Feet from amount, numberOfUnits, and totalSqFeet.
+     * Retrieves all line item data for a given case, combining Estimate 1 and Estimate 2 into a single DTO per line item.
      */
     public List<CaseLineItemDataDTO> getLineItemDataByCaseId(Integer caseId,
                                                               Integer numberOfUnits,
@@ -48,33 +49,56 @@ public class CaseLineItemDataService {
 
         String sql = """
                 SELECT li.line_item_id, li.group_name, li.line_item_name,
-                       cld.amount, cld.comments
+                       cld.estimate_id, cld.amount, cld.comments
                 FROM line_items li
                 LEFT JOIN case_line_item_data cld
                     ON li.line_item_id = cld.line_item_id AND cld.case_id = ?
-                ORDER BY li.line_item_id
+                ORDER BY li.line_item_id, cld.estimate_id
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            CaseLineItemDataDTO dto = new CaseLineItemDataDTO();
-            dto.setLineItemId(rs.getInt("line_item_id"));
-            dto.setGroupName(rs.getString("group_name"));
-            dto.setLineItemName(rs.getString("line_item_name"));
+        Map<Integer, CaseLineItemDataDTO> dtoMap = new LinkedHashMap<>();
+
+        jdbcTemplate.query(sql, (rs) -> {
+            int lineItemId = rs.getInt("line_item_id");
+
+            CaseLineItemDataDTO dto = dtoMap.computeIfAbsent(lineItemId, k -> {
+                CaseLineItemDataDTO newDto = new CaseLineItemDataDTO();
+                try {
+                    newDto.setLineItemId(lineItemId);
+                    newDto.setGroupName(rs.getString("group_name"));
+                    newDto.setLineItemName(rs.getString("line_item_name"));
+                } catch (java.sql.SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                return newDto;
+            });
+
+            Integer estimateId = rs.getObject("estimate_id") != null ? rs.getInt("estimate_id") : null;
+            if (estimateId == null) {
+                return;
+            }
 
             BigDecimal amount = rs.getBigDecimal("amount");
-            dto.setAmount(amount);
+            String comments = rs.getString("comments");
 
-            dto.setUnitAmount(computeUnitAmount(amount, numberOfUnits));
-            dto.setPerSqft(computePerSqft(amount, totalSqFeet));
-
-            dto.setComments(rs.getString("comments"));
-            return dto;
+            if (estimateId == 1) {
+                dto.setEst1Amount(amount);
+                dto.setEst1UnitAmount(computeUnitAmount(amount, numberOfUnits));
+                dto.setEst1PerSqft(computePerSqft(amount, totalSqFeet));
+                dto.setEst1Comments(comments);
+            } else if (estimateId == 2) {
+                dto.setEst2Amount(amount);
+                dto.setEst2UnitAmount(computeUnitAmount(amount, numberOfUnits));
+                dto.setEst2PerSqft(computePerSqft(amount, totalSqFeet));
+                dto.setEst2Comments(comments);
+            }
         }, caseId);
+
+        return dtoMap.values().stream().collect(Collectors.toList());
     }
 
     /**
-     * Updates a single line item data entry for a given case.
-     * Only saves amount and comments. $/Unit and $/Sq.Feet are computed.
+     * Updates a single line item data entry for a given case and estimate.
      */
     @Transactional
     public CaseLineItemDataDTO updateLineItemData(Integer caseId,
@@ -91,36 +115,28 @@ public class CaseLineItemDataService {
 
         validateAmounts(updateDTO);
 
+        Integer estimateId = updateDTO.getEstimateId() != null ? updateDTO.getEstimateId() : 1;
+
         CaseLineItemData data = caseLineItemDataRepository
-                .findByCaseIdAndLineItemId(caseId, updateDTO.getLineItemId())
+                .findByCaseIdAndLineItemIdAndEstimateId(caseId, updateDTO.getLineItemId(), estimateId)
                 .orElseGet(() -> {
                     CaseLineItemData newData = new CaseLineItemData();
                     newData.setCaseId(caseId);
                     newData.setLineItemId(updateDTO.getLineItemId());
+                    newData.setEstimateId(estimateId);
                     return newData;
                 });
 
         data.setAmount(updateDTO.getAmount());
         data.setComments(updateDTO.getComments());
 
-        CaseLineItemData saved = caseLineItemDataRepository.save(data);
+        caseLineItemDataRepository.save(data);
 
-        String lineItemName = lineItemRepository.findById(saved.getLineItemId())
-                .map(li -> li.getLineItemName())
-                .orElse("");
-        String groupName = lineItemRepository.findById(saved.getLineItemId())
-                .map(li -> li.getGroupName())
-                .orElse("");
-
-        return new CaseLineItemDataDTO(
-                saved.getLineItemId(),
-                groupName,
-                lineItemName,
-                saved.getAmount(),
-                computeUnitAmount(saved.getAmount(), numberOfUnits),
-                computePerSqft(saved.getAmount(), totalSqFeet),
-                saved.getComments()
-        );
+        // Return the combined DTO for this line item
+        return getLineItemDataByCaseId(caseId, numberOfUnits, totalSqFeet).stream()
+                .filter(dto -> dto.getLineItemId().equals(updateDTO.getLineItemId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Line item not found after save"));
     }
 
     /**
@@ -131,9 +147,34 @@ public class CaseLineItemDataService {
                                                             List<CaseLineItemUpdateDTO> updates,
                                                             Integer numberOfUnits,
                                                             Integer totalSqFeet) {
-        return updates.stream()
-                .map(update -> updateLineItemData(caseId, update, numberOfUnits, totalSqFeet))
-                .collect(Collectors.toList());
+        if (!caseRepository.existsById(caseId)) {
+            throw new ResourceNotFoundException("Case not found with ID: " + caseId);
+        }
+
+        for (CaseLineItemUpdateDTO updateDTO : updates) {
+            if (!lineItemRepository.existsById(updateDTO.getLineItemId())) {
+                throw new ResourceNotFoundException("Line item not found with ID: " + updateDTO.getLineItemId());
+            }
+            validateAmounts(updateDTO);
+
+            Integer estimateId = updateDTO.getEstimateId() != null ? updateDTO.getEstimateId() : 1;
+
+            CaseLineItemData data = caseLineItemDataRepository
+                    .findByCaseIdAndLineItemIdAndEstimateId(caseId, updateDTO.getLineItemId(), estimateId)
+                    .orElseGet(() -> {
+                        CaseLineItemData newData = new CaseLineItemData();
+                        newData.setCaseId(caseId);
+                        newData.setLineItemId(updateDTO.getLineItemId());
+                        newData.setEstimateId(estimateId);
+                        return newData;
+                    });
+
+            data.setAmount(updateDTO.getAmount());
+            data.setComments(updateDTO.getComments());
+            caseLineItemDataRepository.save(data);
+        }
+
+        return getLineItemDataByCaseId(caseId, numberOfUnits, totalSqFeet);
     }
 
     private BigDecimal computeUnitAmount(BigDecimal amount, Integer numberOfUnits) {

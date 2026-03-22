@@ -16,6 +16,8 @@ export class AdminPageComponent implements OnInit {
   settingsList: AdminSettingsDTO[] = [];
   numberOfUnits: number | null = null;
   totalSquareFeet: number | null = null;
+  expectedMonthlyRentEst1: number | null = null;
+  expectedMonthlyRentEst2: number | null = null;
   editingId: number | null = null;
   isAdding: boolean = false;
 
@@ -40,19 +42,25 @@ export class AdminPageComponent implements OnInit {
     this.isAdding = true;
     this.numberOfUnits = null;
     this.totalSquareFeet = null;
+    this.expectedMonthlyRentEst1 = null;
+    this.expectedMonthlyRentEst2 = null;
   }
 
   onSaveNew(): void {
     const dto: AdminSettingsDTO = {
       id: null,
       numberOfUnits: this.numberOfUnits,
-      totalSquareFeet: this.totalSquareFeet
+      totalSquareFeet: this.totalSquareFeet,
+      expectedMonthlyRentEst1: this.expectedMonthlyRentEst1,
+      expectedMonthlyRentEst2: this.expectedMonthlyRentEst2
     };
     this.caseService.createAdminSettings(dto).subscribe({
       next: () => {
         this.isAdding = false;
         this.numberOfUnits = null;
         this.totalSquareFeet = null;
+        this.expectedMonthlyRentEst1 = null;
+        this.expectedMonthlyRentEst2 = null;
         this.loadSettings();
       },
       error: (err) => {
@@ -65,12 +73,16 @@ export class AdminPageComponent implements OnInit {
     this.isAdding = false;
     this.numberOfUnits = null;
     this.totalSquareFeet = null;
+    this.expectedMonthlyRentEst1 = null;
+    this.expectedMonthlyRentEst2 = null;
   }
 
   onEdit(setting: AdminSettingsDTO): void {
     this.editingId = setting.id;
     this.numberOfUnits = setting.numberOfUnits;
     this.totalSquareFeet = setting.totalSquareFeet;
+    this.expectedMonthlyRentEst1 = setting.expectedMonthlyRentEst1;
+    this.expectedMonthlyRentEst2 = setting.expectedMonthlyRentEst2;
   }
 
   onUpdate(setting: AdminSettingsDTO): void {
@@ -78,13 +90,17 @@ export class AdminPageComponent implements OnInit {
     const dto: AdminSettingsDTO = {
       id: setting.id,
       numberOfUnits: this.numberOfUnits,
-      totalSquareFeet: this.totalSquareFeet
+      totalSquareFeet: this.totalSquareFeet,
+      expectedMonthlyRentEst1: this.expectedMonthlyRentEst1,
+      expectedMonthlyRentEst2: this.expectedMonthlyRentEst2
     };
     this.caseService.updateAdminSettings(setting.id, dto).subscribe({
       next: () => {
         this.editingId = null;
         this.numberOfUnits = null;
         this.totalSquareFeet = null;
+        this.expectedMonthlyRentEst1 = null;
+        this.expectedMonthlyRentEst2 = null;
         this.loadSettings();
       },
       error: (err) => {
@@ -97,6 +113,8 @@ export class AdminPageComponent implements OnInit {
     this.editingId = null;
     this.numberOfUnits = null;
     this.totalSquareFeet = null;
+    this.expectedMonthlyRentEst1 = null;
+    this.expectedMonthlyRentEst2 = null;
   }
 
   onDelete(id: number | null): void {

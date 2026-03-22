@@ -11,6 +11,9 @@ public class CaseLineItemUpdateDTO {
     @NotNull(message = "Line item ID is required")
     private Integer lineItemId;
 
+    @NotNull(message = "Estimate ID is required")
+    private Integer estimateId;
+
     @DecimalMax(value = "10000000", message = "Amount must not exceed 10,000,000")
     private BigDecimal amount;
 
@@ -26,6 +29,14 @@ public class CaseLineItemUpdateDTO {
 
     public void setLineItemId(Integer lineItemId) {
         this.lineItemId = lineItemId;
+    }
+
+    public Integer getEstimateId() {
+        return estimateId;
+    }
+
+    public void setEstimateId(Integer estimateId) {
+        this.estimateId = estimateId;
     }
 
     public BigDecimal getAmount() {

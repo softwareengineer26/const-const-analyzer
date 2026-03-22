@@ -11,13 +11,28 @@
         </select>
       </div>
       <div class="action-buttons">
+        <label class="toggle-label">
+          <input type="checkbox" [checked]="showEstimate2" (change)="toggleEstimate2()" />
+          Show Estimate# 2
+        </label>
         <button class="btn btn-save" (click)="onSave()" [disabled]="!hasPendingChanges">Save</button>
         <button class="btn btn-refresh" (click)="onRefresh()">Refresh</button>
       </div>
     </div>
   </div>
 
+  <div class="tab-bar">
+    <button
+      *ngFor="let label of tabLabels; let i = index"
+      class="tab-btn"
+      [class.active]="activeTab === i"
+      (click)="onTabChange(i)">
+      {{ label }}
+    </button>
+  </div>
+
   <ag-grid-angular
+    *ngIf="activeTab < 3"
     class="ag-theme-alpine cost-grid"
     [rowData]="rowData"
     [columnDefs]="columnDefs"
@@ -27,5 +42,15 @@
     [stopEditingWhenCellsLoseFocus]="true"
     (gridReady)="onGridReady($event)"
     (cellValueChanged)="onCellValueChanged($event)">
+  </ag-grid-angular>
+
+  <ag-grid-angular
+    *ngIf="activeTab === 3"
+    class="ag-theme-alpine cost-grid"
+    [rowData]="aggregatedData"
+    [columnDefs]="aggregatedColumnDefs"
+    [defaultColDef]="defaultColDef"
+    [animateRows]="true"
+    (gridReady)="onGridReady($event)">
   </ag-grid-angular>
 </div>

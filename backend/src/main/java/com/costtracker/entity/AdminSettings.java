@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "admin_settings")
@@ -22,13 +23,13 @@ public class AdminSettings {
     @Column(name = "total_square_feet")
     private Integer totalSquareFeet;
 
-    public AdminSettings() {
-    }
+    @Column(name = "expected_monthly_rent_est1", precision = 12, scale = 2)
+    private BigDecimal expectedMonthlyRentEst1;
 
-    public AdminSettings(Integer id, Integer numberOfUnits, Integer totalSquareFeet) {
-        this.id = id;
-        this.numberOfUnits = numberOfUnits;
-        this.totalSquareFeet = totalSquareFeet;
+    @Column(name = "expected_monthly_rent_est2", precision = 12, scale = 2)
+    private BigDecimal expectedMonthlyRentEst2;
+
+    public AdminSettings() {
     }
 
     public Integer getId() {
@@ -53,5 +54,21 @@ public class AdminSettings {
 
     public void setTotalSquareFeet(Integer totalSquareFeet) {
         this.totalSquareFeet = totalSquareFeet;
+    }
+
+    public BigDecimal getExpectedMonthlyRentEst1() {
+        return expectedMonthlyRentEst1;
+    }
+
+    public void setExpectedMonthlyRentEst1(BigDecimal expectedMonthlyRentEst1) {
+        this.expectedMonthlyRentEst1 = expectedMonthlyRentEst1;
+    }
+
+    public BigDecimal getExpectedMonthlyRentEst2() {
+        return expectedMonthlyRentEst2;
+    }
+
+    public void setExpectedMonthlyRentEst2(BigDecimal expectedMonthlyRentEst2) {
+        this.expectedMonthlyRentEst2 = expectedMonthlyRentEst2;
     }
 }

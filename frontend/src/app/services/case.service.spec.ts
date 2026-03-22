@@ -93,6 +93,7 @@ describe('CaseService', () => {
     it('should update a single line item with params', () => {
       const updateDTO: CaseLineItemUpdateDTO = {
         lineItemId: 1,
+        estimateId: 1,
         amount: 5000,
         comments: 'test'
       };
@@ -111,8 +112,8 @@ describe('CaseService', () => {
   describe('updateAllLineItems', () => {
     it('should update all line items with params', () => {
       const updates: CaseLineItemUpdateDTO[] = [
-        { lineItemId: 1, amount: 5000, comments: 'test' },
-        { lineItemId: 2, amount: 8000, comments: null }
+        { lineItemId: 1, estimateId: 1, amount: 5000, comments: 'test' },
+        { lineItemId: 2, estimateId: 1, amount: 8000, comments: null }
       ];
 
       service.updateAllLineItems(1, updates, 100, 20000).subscribe();
@@ -129,7 +130,7 @@ describe('CaseService', () => {
   describe('Admin Settings', () => {
     it('should get all admin settings', () => {
       const mockSettings: AdminSettingsDTO[] = [
-        { id: 1, numberOfUnits: 100, totalSquareFeet: 20000 }
+        { id: 1, numberOfUnits: 100, totalSquareFeet: 20000, expectedMonthlyRentEst1: 1500, expectedMonthlyRentEst2: 1800 }
       ];
 
       service.getAllAdminSettings().subscribe(settings => {
@@ -143,7 +144,7 @@ describe('CaseService', () => {
     });
 
     it('should get admin settings by id', () => {
-      const mockSetting: AdminSettingsDTO = { id: 1, numberOfUnits: 100, totalSquareFeet: 20000 };
+      const mockSetting: AdminSettingsDTO = { id: 1, numberOfUnits: 100, totalSquareFeet: 20000, expectedMonthlyRentEst1: 1500, expectedMonthlyRentEst2: 1800 };
 
       service.getAdminSettingsById(1).subscribe(setting => {
         expect(setting.id).toBe(1);
@@ -155,7 +156,7 @@ describe('CaseService', () => {
     });
 
     it('should create admin settings', () => {
-      const newSetting: AdminSettingsDTO = { id: null, numberOfUnits: 200, totalSquareFeet: 40000 };
+      const newSetting: AdminSettingsDTO = { id: null, numberOfUnits: 200, totalSquareFeet: 40000, expectedMonthlyRentEst1: 2000, expectedMonthlyRentEst2: 2500 };
 
       service.createAdminSettings(newSetting).subscribe();
 
@@ -166,7 +167,7 @@ describe('CaseService', () => {
     });
 
     it('should update admin settings', () => {
-      const updated: AdminSettingsDTO = { id: 1, numberOfUnits: 300, totalSquareFeet: 60000 };
+      const updated: AdminSettingsDTO = { id: 1, numberOfUnits: 300, totalSquareFeet: 60000, expectedMonthlyRentEst1: 2500, expectedMonthlyRentEst2: 3000 };
 
       service.updateAdminSettings(1, updated).subscribe();
 
