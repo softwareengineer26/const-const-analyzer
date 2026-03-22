@@ -354,7 +354,18 @@ export class CostGridComponent implements OnInit {
 
   onRefresh(): void {
     this.pendingChanges.clear();
-    this.loadAdminSettings();
+    this.caseService.getAllAdminSettings().subscribe({
+      next: (settings) => {
+        if (settings.length > 0) {
+          this.adminSettings = settings[0];
+        }
+        this.loadCaseData();
+      },
+      error: (err) => {
+        console.error('Error loading admin settings:', err);
+        this.loadCaseData();
+      }
+    });
   }
 
   get hasPendingChanges(): boolean {
