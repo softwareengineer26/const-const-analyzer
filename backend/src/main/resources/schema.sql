@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS case_line_item_data (
     CONSTRAINT uk_case_line_item_estimate UNIQUE (case_id, line_item_id, estimate_id)
 );
 
+-- Migration: add new columns to case_line_item_data if upgrading from older schema
+ALTER TABLE case_line_item_data ADD COLUMN IF NOT EXISTS estimate_id INT NOT NULL DEFAULT 1;
+ALTER TABLE case_line_item_data ADD COLUMN IF NOT EXISTS unit_amount DECIMAL(12, 2);
+ALTER TABLE case_line_item_data ADD COLUMN IF NOT EXISTS per_sqft DECIMAL(8, 2);
+
 -- Admin Settings Table
 CREATE TABLE IF NOT EXISTS admin_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,3 +40,7 @@ CREATE TABLE IF NOT EXISTS admin_settings (
     expected_monthly_rent_est1 DECIMAL(12, 2),
     expected_monthly_rent_est2 DECIMAL(12, 2)
 );
+
+-- Migration: add rent columns to admin_settings if upgrading from older schema
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS expected_monthly_rent_est1 DECIMAL(12, 2);
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS expected_monthly_rent_est2 DECIMAL(12, 2);
