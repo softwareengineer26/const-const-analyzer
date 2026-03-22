@@ -6,6 +6,7 @@ export interface CaseDTO {
 
 export interface CaseLineItemDataDTO {
   lineItemId: number;
+  groupName: string | null;
   lineItemName: string;
   amount: number | null;
   unitAmount: number | null;
@@ -16,7 +17,11 @@ export interface CaseLineItemDataDTO {
 export interface CaseLineItemUpdateDTO {
   lineItemId: number;
   amount: number | null;
-  unitAmount: number | null;
-  perSqft: number | null;
   comments: string | null;
+}
+
+export interface AdminSettingsDTO {
+  id: number | null;
+  numberOfUnits: number | null;
+  totalSquareFeet: number | null;
 }

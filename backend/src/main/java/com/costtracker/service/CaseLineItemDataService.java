@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,17 +37,18 @@ public class CaseLineItemDataService {
 
     /**
      * Retrieves all line item data for a given case using Spring JDBC Template.
-     * Demonstrates usage of JDBC Template alongside JPA.
+     * Computes $/Unit and $/Sq.Feet from amount, numberOfUnits, and totalSqFeet.
      */
-    public List<CaseLineItemDataDTO> getLineItemDataByCaseId(Integer caseId) {
-        // Verify case exists
+    public List<CaseLineItemDataDTO> getLineItemDataByCaseId(Integer caseId,
+                                                              Integer numberOfUnits,
+                                                              Integer totalSqFeet) {
         if (!caseRepository.existsById(caseId)) {
             throw new ResourceNotFoundException("Case not found with ID: " + caseId);
         }
 
         String sql = """
-                SELECT li.line_item_id, li.line_item_name,
-                       cld.amount, cld.unit_amount, cld.per_sqft, cld.comments
+                SELECT li.line_item_id, li.group_name, li.line_item_name,
+                       cld.amount, cld.comments
                 FROM line_items li
                 LEFT JOIN case_line_item_data cld
                     ON li.line_item_id = cld.line_item_id AND cld.case_id = ?
@@ -56,16 +58,14 @@ public class CaseLineItemDataService {
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             CaseLineItemDataDTO dto = new CaseLineItemDataDTO();
             dto.setLineItemId(rs.getInt("line_item_id"));
+            dto.setGroupName(rs.getString("group_name"));
             dto.setLineItemName(rs.getString("line_item_name"));
 
             BigDecimal amount = rs.getBigDecimal("amount");
             dto.setAmount(amount);
 
-            BigDecimal unitAmount = rs.getBigDecimal("unit_amount");
-            dto.setUnitAmount(unitAmount);
-
-            BigDecimal perSqft = rs.getBigDecimal("per_sqft");
-            dto.setPerSqft(perSqft);
+            dto.setUnitAmount(computeUnitAmount(amount, numberOfUnits));
+            dto.setPerSqft(computePerSqft(amount, totalSqFeet));
 
             dto.setComments(rs.getString("comments"));
             return dto;
@@ -74,21 +74,21 @@ public class CaseLineItemDataService {
 
     /**
      * Updates a single line item data entry for a given case.
-     * Uses JPA for the update operation.
+     * Only saves amount and comments. $/Unit and $/Sq.Feet are computed.
      */
     @Transactional
-    public CaseLineItemDataDTO updateLineItemData(Integer caseId, CaseLineItemUpdateDTO updateDTO) {
-        // Validate case exists
+    public CaseLineItemDataDTO updateLineItemData(Integer caseId,
+                                                   CaseLineItemUpdateDTO updateDTO,
+                                                   Integer numberOfUnits,
+                                                   Integer totalSqFeet) {
         if (!caseRepository.existsById(caseId)) {
             throw new ResourceNotFoundException("Case not found with ID: " + caseId);
         }
 
-        // Validate line item exists
         if (!lineItemRepository.existsById(updateDTO.getLineItemId())) {
             throw new ResourceNotFoundException("Line item not found with ID: " + updateDTO.getLineItemId());
         }
 
-        // Validate amount constraints
         validateAmounts(updateDTO);
 
         CaseLineItemData data = caseLineItemDataRepository
@@ -101,23 +101,24 @@ public class CaseLineItemDataService {
                 });
 
         data.setAmount(updateDTO.getAmount());
-        data.setUnitAmount(updateDTO.getUnitAmount());
-        data.setPerSqft(updateDTO.getPerSqft());
         data.setComments(updateDTO.getComments());
 
         CaseLineItemData saved = caseLineItemDataRepository.save(data);
 
-        // Fetch line item name for DTO
         String lineItemName = lineItemRepository.findById(saved.getLineItemId())
                 .map(li -> li.getLineItemName())
+                .orElse("");
+        String groupName = lineItemRepository.findById(saved.getLineItemId())
+                .map(li -> li.getGroupName())
                 .orElse("");
 
         return new CaseLineItemDataDTO(
                 saved.getLineItemId(),
+                groupName,
                 lineItemName,
                 saved.getAmount(),
-                saved.getUnitAmount(),
-                saved.getPerSqft(),
+                computeUnitAmount(saved.getAmount(), numberOfUnits),
+                computePerSqft(saved.getAmount(), totalSqFeet),
                 saved.getComments()
         );
     }
@@ -126,21 +127,32 @@ public class CaseLineItemDataService {
      * Batch update all line items for a given case.
      */
     @Transactional
-    public List<CaseLineItemDataDTO> updateAllLineItemData(Integer caseId, List<CaseLineItemUpdateDTO> updates) {
+    public List<CaseLineItemDataDTO> updateAllLineItemData(Integer caseId,
+                                                            List<CaseLineItemUpdateDTO> updates,
+                                                            Integer numberOfUnits,
+                                                            Integer totalSqFeet) {
         return updates.stream()
-                .map(update -> updateLineItemData(caseId, update))
+                .map(update -> updateLineItemData(caseId, update, numberOfUnits, totalSqFeet))
                 .collect(Collectors.toList());
+    }
+
+    private BigDecimal computeUnitAmount(BigDecimal amount, Integer numberOfUnits) {
+        if (amount == null || numberOfUnits == null || numberOfUnits == 0) {
+            return null;
+        }
+        return amount.divide(BigDecimal.valueOf(numberOfUnits), 2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal computePerSqft(BigDecimal amount, Integer totalSqFeet) {
+        if (amount == null || totalSqFeet == null || totalSqFeet == 0) {
+            return null;
+        }
+        return amount.divide(BigDecimal.valueOf(totalSqFeet), 2, RoundingMode.HALF_UP);
     }
 
     private void validateAmounts(CaseLineItemUpdateDTO dto) {
         if (dto.getAmount() != null && dto.getAmount().compareTo(new BigDecimal("10000000")) > 0) {
             throw new BadRequestException("Amount must not exceed 10,000,000");
-        }
-        if (dto.getUnitAmount() != null && dto.getUnitAmount().compareTo(new BigDecimal("10000000")) > 0) {
-            throw new BadRequestException("Unit amount must not exceed 10,000,000");
-        }
-        if (dto.getPerSqft() != null && dto.getPerSqft().compareTo(new BigDecimal("1000")) > 0) {
-            throw new BadRequestException("Per sq.ft. must not exceed 1,000");
         }
     }
 }

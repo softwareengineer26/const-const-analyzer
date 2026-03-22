@@ -24,6 +24,6 @@ public class LineItemService {
     }
 
     private LineItemDTO toDTO(LineItem entity) {
-        return new LineItemDTO(entity.getLineItemId(), entity.getLineItemName());
+        return new LineItemDTO(entity.getLineItemId(), entity.getGroupName(), entity.getLineItemName());
     }
 }

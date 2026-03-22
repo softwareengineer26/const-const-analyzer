@@ -31,12 +31,6 @@ public class CaseLineItemData {
     @Column(name = "amount", precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "unit_amount", precision = 12, scale = 2)
-    private BigDecimal unitAmount;
-
-    @Column(name = "per_sqft", precision = 8, scale = 2)
-    private BigDecimal perSqft;
-
     @Column(name = "comments", length = 300)
     private String comments;
 
@@ -81,22 +75,6 @@ public class CaseLineItemData {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public BigDecimal getUnitAmount() {
-        return unitAmount;
-    }
-
-    public void setUnitAmount(BigDecimal unitAmount) {
-        this.unitAmount = unitAmount;
-    }
-
-    public BigDecimal getPerSqft() {
-        return perSqft;
-    }
-
-    public void setPerSqft(BigDecimal perSqft) {
-        this.perSqft = perSqft;
     }
 
     public String getComments() {

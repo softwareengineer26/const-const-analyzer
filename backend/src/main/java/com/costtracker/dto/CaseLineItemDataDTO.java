@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class CaseLineItemDataDTO {
 
     private Integer lineItemId;
+    private String groupName;
     private String lineItemName;
     private BigDecimal amount;
     private BigDecimal unitAmount;
@@ -14,10 +15,11 @@ public class CaseLineItemDataDTO {
     public CaseLineItemDataDTO() {
     }
 
-    public CaseLineItemDataDTO(Integer lineItemId, String lineItemName,
+    public CaseLineItemDataDTO(Integer lineItemId, String groupName, String lineItemName,
                                 BigDecimal amount, BigDecimal unitAmount,
                                 BigDecimal perSqft, String comments) {
         this.lineItemId = lineItemId;
+        this.groupName = groupName;
         this.lineItemName = lineItemName;
         this.amount = amount;
         this.unitAmount = unitAmount;
@@ -31,6 +33,14 @@ public class CaseLineItemDataDTO {
 
     public void setLineItemId(Integer lineItemId) {
         this.lineItemId = lineItemId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getLineItemName() {
