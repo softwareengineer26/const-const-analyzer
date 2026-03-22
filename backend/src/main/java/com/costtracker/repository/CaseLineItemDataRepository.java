@@ -13,4 +13,6 @@ public interface CaseLineItemDataRepository extends JpaRepository<CaseLineItemDa
     List<CaseLineItemData> findByCaseId(Integer caseId);
 
     Optional<CaseLineItemData> findByCaseIdAndLineItemId(Integer caseId, Integer lineItemId);
+
+    Optional<CaseLineItemData> findByCaseIdAndLineItemIdAndEstimateId(Integer caseId, Integer lineItemId, Integer estimateId);
 }

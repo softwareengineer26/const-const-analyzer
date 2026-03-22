@@ -34,6 +34,8 @@ public class AdminSettingsService {
         AdminSettings entity = new AdminSettings();
         entity.setNumberOfUnits(dto.getNumberOfUnits());
         entity.setTotalSquareFeet(dto.getTotalSquareFeet());
+        entity.setExpectedMonthlyRentEst1(dto.getExpectedMonthlyRentEst1());
+        entity.setExpectedMonthlyRentEst2(dto.getExpectedMonthlyRentEst2());
         AdminSettings saved = adminSettingsRepository.save(entity);
         return toDTO(saved);
     }
@@ -43,6 +45,8 @@ public class AdminSettingsService {
                 .orElseThrow(() -> new ResourceNotFoundException("Admin settings not found with ID: " + id));
         entity.setNumberOfUnits(dto.getNumberOfUnits());
         entity.setTotalSquareFeet(dto.getTotalSquareFeet());
+        entity.setExpectedMonthlyRentEst1(dto.getExpectedMonthlyRentEst1());
+        entity.setExpectedMonthlyRentEst2(dto.getExpectedMonthlyRentEst2());
         AdminSettings saved = adminSettingsRepository.save(entity);
         return toDTO(saved);
     }
@@ -55,6 +59,12 @@ public class AdminSettingsService {
     }
 
     private AdminSettingsDTO toDTO(AdminSettings entity) {
-        return new AdminSettingsDTO(entity.getId(), entity.getNumberOfUnits(), entity.getTotalSquareFeet());
+        return new AdminSettingsDTO(
+                entity.getId(),
+                entity.getNumberOfUnits(),
+                entity.getTotalSquareFeet(),
+                entity.getExpectedMonthlyRentEst1(),
+                entity.getExpectedMonthlyRentEst2()
+        );
     }
 }

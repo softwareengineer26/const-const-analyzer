@@ -12,8 +12,8 @@ describe('AdminPageComponent', () => {
   let caseService: jasmine.SpyObj<CaseService>;
 
   const mockSettings: AdminSettingsDTO[] = [
-    { id: 1, numberOfUnits: 100, totalSquareFeet: 20000 },
-    { id: 2, numberOfUnits: 200, totalSquareFeet: 40000 }
+    { id: 1, numberOfUnits: 100, totalSquareFeet: 20000, expectedMonthlyRentEst1: 1500, expectedMonthlyRentEst2: 1800 },
+    { id: 2, numberOfUnits: 200, totalSquareFeet: 40000, expectedMonthlyRentEst1: 2000, expectedMonthlyRentEst2: 2500 }
   ];
 
   beforeEach(async () => {
@@ -57,29 +57,39 @@ describe('AdminPageComponent', () => {
     expect(component.isAdding).toBeTrue();
     expect(component.numberOfUnits).toBeNull();
     expect(component.totalSquareFeet).toBeNull();
+    expect(component.expectedMonthlyRentEst1).toBeNull();
+    expect(component.expectedMonthlyRentEst2).toBeNull();
   });
 
   it('should cancel adding and reset fields', () => {
     component.onAdd();
     component.numberOfUnits = 50;
     component.totalSquareFeet = 10000;
+    component.expectedMonthlyRentEst1 = 1000;
+    component.expectedMonthlyRentEst2 = 1200;
     component.onCancelAdd();
     expect(component.isAdding).toBeFalse();
     expect(component.numberOfUnits).toBeNull();
     expect(component.totalSquareFeet).toBeNull();
+    expect(component.expectedMonthlyRentEst1).toBeNull();
+    expect(component.expectedMonthlyRentEst2).toBeNull();
   });
 
   it('should create new settings on save', fakeAsync(() => {
     component.onAdd();
     component.numberOfUnits = 150;
     component.totalSquareFeet = 30000;
+    component.expectedMonthlyRentEst1 = 1500;
+    component.expectedMonthlyRentEst2 = 1800;
     component.onSaveNew();
     tick();
 
     expect(caseService.createAdminSettings).toHaveBeenCalledWith({
       id: null,
       numberOfUnits: 150,
-      totalSquareFeet: 30000
+      totalSquareFeet: 30000,
+      expectedMonthlyRentEst1: 1500,
+      expectedMonthlyRentEst2: 1800
     });
     expect(component.isAdding).toBeFalse();
   }));
@@ -90,6 +100,8 @@ describe('AdminPageComponent', () => {
     expect(component.editingId).toBe(1);
     expect(component.numberOfUnits).toBe(100);
     expect(component.totalSquareFeet).toBe(20000);
+    expect(component.expectedMonthlyRentEst1).toBe(1500);
+    expect(component.expectedMonthlyRentEst2).toBe(1800);
   });
 
   it('should cancel editing and reset fields', () => {
@@ -98,25 +110,31 @@ describe('AdminPageComponent', () => {
     expect(component.editingId).toBeNull();
     expect(component.numberOfUnits).toBeNull();
     expect(component.totalSquareFeet).toBeNull();
+    expect(component.expectedMonthlyRentEst1).toBeNull();
+    expect(component.expectedMonthlyRentEst2).toBeNull();
   });
 
   it('should update settings', fakeAsync(() => {
     component.onEdit(mockSettings[0]);
     component.numberOfUnits = 250;
     component.totalSquareFeet = 50000;
+    component.expectedMonthlyRentEst1 = 2000;
+    component.expectedMonthlyRentEst2 = 2500;
     component.onUpdate(mockSettings[0]);
     tick();
 
     expect(caseService.updateAdminSettings).toHaveBeenCalledWith(1, {
       id: 1,
       numberOfUnits: 250,
-      totalSquareFeet: 50000
+      totalSquareFeet: 50000,
+      expectedMonthlyRentEst1: 2000,
+      expectedMonthlyRentEst2: 2500
     });
     expect(component.editingId).toBeNull();
   }));
 
   it('should not update if setting id is null', () => {
-    const nullSetting: AdminSettingsDTO = { id: null, numberOfUnits: 100, totalSquareFeet: 20000 };
+    const nullSetting: AdminSettingsDTO = { id: null, numberOfUnits: 100, totalSquareFeet: 20000, expectedMonthlyRentEst1: null, expectedMonthlyRentEst2: null };
     component.onUpdate(nullSetting);
     expect(caseService.updateAdminSettings).not.toHaveBeenCalled();
   });

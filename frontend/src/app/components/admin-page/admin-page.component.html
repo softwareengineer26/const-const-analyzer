@@ -15,6 +15,14 @@
       <label for="newSqFt">Total Square Feet:</label>
       <input id="newSqFt" type="number" [(ngModel)]="totalSquareFeet" min="0" placeholder="Enter total square feet" />
     </div>
+    <div class="form-group">
+      <label for="newRentEst1">Expected Monthly Rent/Unit (Estimate# 1):</label>
+      <input id="newRentEst1" type="number" [(ngModel)]="expectedMonthlyRentEst1" min="0" placeholder="Enter monthly rent for Estimate# 1" />
+    </div>
+    <div class="form-group">
+      <label for="newRentEst2">Expected Monthly Rent/Unit (Estimate# 2):</label>
+      <input id="newRentEst2" type="number" [(ngModel)]="expectedMonthlyRentEst2" min="0" placeholder="Enter monthly rent for Estimate# 2" />
+    </div>
     <div class="form-actions">
       <button class="btn btn-success" (click)="onSaveNew()">Save</button>
       <button class="btn btn-secondary" (click)="onCancelAdd()">Cancel</button>
@@ -27,6 +35,8 @@
         <th>ID</th>
         <th>Number of Units</th>
         <th>Total Square Feet</th>
+        <th>Monthly Rent/Unit (Est# 1)</th>
+        <th>Monthly Rent/Unit (Est# 2)</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -40,6 +50,14 @@
         <td>
           <span *ngIf="editingId !== setting.id">{{ setting.totalSquareFeet }}</span>
           <input *ngIf="editingId === setting.id" type="number" [(ngModel)]="totalSquareFeet" min="0" />
+        </td>
+        <td>
+          <span *ngIf="editingId !== setting.id">{{ setting.expectedMonthlyRentEst1 }}</span>
+          <input *ngIf="editingId === setting.id" type="number" [(ngModel)]="expectedMonthlyRentEst1" min="0" />
+        </td>
+        <td>
+          <span *ngIf="editingId !== setting.id">{{ setting.expectedMonthlyRentEst2 }}</span>
+          <input *ngIf="editingId === setting.id" type="number" [(ngModel)]="expectedMonthlyRentEst2" min="0" />
         </td>
         <td class="action-buttons">
           <button class="btn btn-edit" *ngIf="editingId !== setting.id" (click)="onEdit(setting)">Edit</button>
