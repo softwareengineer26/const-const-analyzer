@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,23 +26,30 @@ public class CaseLineItemDataController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CaseLineItemDataDTO>> getLineItemData(@PathVariable Integer caseId) {
-        return ResponseEntity.ok(caseLineItemDataService.getLineItemDataByCaseId(caseId));
+    public ResponseEntity<List<CaseLineItemDataDTO>> getLineItemData(
+            @PathVariable Integer caseId,
+            @RequestParam(required = false) Integer numberOfUnits,
+            @RequestParam(required = false) Integer totalSqFeet) {
+        return ResponseEntity.ok(caseLineItemDataService.getLineItemDataByCaseId(caseId, numberOfUnits, totalSqFeet));
     }
 
     @PutMapping("/{lineItemId}")
     public ResponseEntity<CaseLineItemDataDTO> updateLineItemData(
             @PathVariable Integer caseId,
             @PathVariable Integer lineItemId,
+            @RequestParam(required = false) Integer numberOfUnits,
+            @RequestParam(required = false) Integer totalSqFeet,
             @Valid @RequestBody CaseLineItemUpdateDTO updateDTO) {
         updateDTO.setLineItemId(lineItemId);
-        return ResponseEntity.ok(caseLineItemDataService.updateLineItemData(caseId, updateDTO));
+        return ResponseEntity.ok(caseLineItemDataService.updateLineItemData(caseId, updateDTO, numberOfUnits, totalSqFeet));
     }
 
     @PutMapping
     public ResponseEntity<List<CaseLineItemDataDTO>> updateAllLineItemData(
             @PathVariable Integer caseId,
+            @RequestParam(required = false) Integer numberOfUnits,
+            @RequestParam(required = false) Integer totalSqFeet,
             @Valid @RequestBody List<CaseLineItemUpdateDTO> updates) {
-        return ResponseEntity.ok(caseLineItemDataService.updateAllLineItemData(caseId, updates));
+        return ResponseEntity.ok(caseLineItemDataService.updateAllLineItemData(caseId, updates, numberOfUnits, totalSqFeet));
     }
 }

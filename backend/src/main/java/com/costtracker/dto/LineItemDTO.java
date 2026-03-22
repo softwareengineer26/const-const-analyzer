@@ -3,13 +3,15 @@ package com.costtracker.dto;
 public class LineItemDTO {
 
     private Integer lineItemId;
+    private String groupName;
     private String lineItemName;
 
     public LineItemDTO() {
     }
 
-    public LineItemDTO(Integer lineItemId, String lineItemName) {
+    public LineItemDTO(Integer lineItemId, String groupName, String lineItemName) {
         this.lineItemId = lineItemId;
+        this.groupName = groupName;
         this.lineItemName = lineItemName;
     }
 
@@ -19,6 +21,14 @@ public class LineItemDTO {
 
     public void setLineItemId(Integer lineItemId) {
         this.lineItemId = lineItemId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getLineItemName() {

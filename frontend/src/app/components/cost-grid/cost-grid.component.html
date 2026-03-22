@@ -1,13 +1,19 @@
 <div class="cost-grid-container">
   <div class="header-section">
-    <h1>Construction Cost Tracker</h1>
-    <div class="case-selector">
-      <label for="caseSelect">Select Case:</label>
-      <select id="caseSelect" [(ngModel)]="selectedCaseId" (ngModelChange)="onCaseChange()">
-        <option *ngFor="let c of cases" [ngValue]="c.caseId">
-          {{ c.caseName }} (ID: {{ c.caseId }})
-        </option>
-      </select>
+    <h1>Construction Cost Analyzer</h1>
+    <div class="header-controls">
+      <div class="case-selector">
+        <label for="caseSelect">Select Case:</label>
+        <select id="caseSelect" [(ngModel)]="selectedCaseId" (ngModelChange)="onCaseChange()">
+          <option *ngFor="let c of cases" [ngValue]="c.caseId">
+            {{ c.caseName }} (ID: {{ c.caseId }})
+          </option>
+        </select>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-save" (click)="onSave()" [disabled]="!hasPendingChanges">Save</button>
+        <button class="btn btn-refresh" (click)="onRefresh()">Refresh</button>
+      </div>
     </div>
   </div>
 

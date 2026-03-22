@@ -1,0 +1,55 @@
+<div class="admin-container">
+  <h2>Admin Settings</h2>
+
+  <div class="admin-actions">
+    <button class="btn btn-primary" (click)="onAdd()" *ngIf="!isAdding">Add New Setting</button>
+  </div>
+
+  <div class="add-form" *ngIf="isAdding">
+    <h3>Add New Setting</h3>
+    <div class="form-group">
+      <label for="newUnits">Number of Units:</label>
+      <input id="newUnits" type="number" [(ngModel)]="numberOfUnits" min="0" placeholder="Enter number of units" />
+    </div>
+    <div class="form-group">
+      <label for="newSqFt">Total Square Feet:</label>
+      <input id="newSqFt" type="number" [(ngModel)]="totalSquareFeet" min="0" placeholder="Enter total square feet" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-success" (click)="onSaveNew()">Save</button>
+      <button class="btn btn-secondary" (click)="onCancelAdd()">Cancel</button>
+    </div>
+  </div>
+
+  <table class="settings-table" *ngIf="settingsList.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Number of Units</th>
+        <th>Total Square Feet</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let setting of settingsList">
+        <td>{{ setting.id }}</td>
+        <td>
+          <span *ngIf="editingId !== setting.id">{{ setting.numberOfUnits }}</span>
+          <input *ngIf="editingId === setting.id" type="number" [(ngModel)]="numberOfUnits" min="0" />
+        </td>
+        <td>
+          <span *ngIf="editingId !== setting.id">{{ setting.totalSquareFeet }}</span>
+          <input *ngIf="editingId === setting.id" type="number" [(ngModel)]="totalSquareFeet" min="0" />
+        </td>
+        <td class="action-buttons">
+          <button class="btn btn-edit" *ngIf="editingId !== setting.id" (click)="onEdit(setting)">Edit</button>
+          <button class="btn btn-success" *ngIf="editingId === setting.id" (click)="onUpdate(setting)">Save</button>
+          <button class="btn btn-secondary" *ngIf="editingId === setting.id" (click)="onCancelEdit()">Cancel</button>
+          <button class="btn btn-danger" *ngIf="editingId !== setting.id" (click)="onDelete(setting.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="settingsList.length === 0 && !isAdding" class="no-data">No admin settings found. Click "Add New Setting" to create one.</p>
+</div>
